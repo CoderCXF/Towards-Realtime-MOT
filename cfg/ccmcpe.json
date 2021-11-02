@@ -1,13 +1,8 @@
 {
-    "root":"/home/wangzd/datasets/MOT",
+    "root":"D:/datasets/",
     "train":
     {
-        "mot17":"./data/mot17.train",
-        "caltech":"./data/caltech.train",
-        "citypersons":"./data/citypersons.train",
-        "cuhksysu":"./data/cuhksysu.train",
-        "prw":"./data/prw.train",
-        "eth":"./data/eth.train"
+        "mot17":"./data/mot17.train"
     },
     "test_emb":
     {

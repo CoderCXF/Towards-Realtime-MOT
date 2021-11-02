@@ -10,7 +10,7 @@ import math
 
 try:
     from utils.syncbn import SyncBN
-    batch_norm=SyncBN #nn.BatchNorm2d
+    batch_norm=nn.BatchNorm2d  #SyncBN
 except ImportError:
     batch_norm=nn.BatchNorm2d
 

@@ -156,7 +156,8 @@ def train(
         checkpoint = {'epoch': epoch,
                       'model': model.module.state_dict(),
                       'optimizer': optimizer.state_dict()}
-
+        if not os.path.exists(weights_to + '/cfg'):
+            os.mkdir(weights_to + '/cfg')
         copyfile(cfg, weights_to + '/cfg/yolo3.cfg')
         copyfile(data_cfg, weights_to + '/cfg/ccmcpe.json')
 
@@ -182,7 +183,7 @@ def train(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs')
-    parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
+    parser.add_argument('--batch-size', type=int, default=2, help='size of each image batch')
     parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
     parser.add_argument('--cfg', type=str, default='cfg/yolov3.cfg', help='cfg file path')
     parser.add_argument('--weights-from', type=str, default='weights/',
