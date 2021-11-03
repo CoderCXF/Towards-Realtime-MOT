@@ -39,30 +39,32 @@ def train(
     torch.backends.cudnn.benchmark = True  # unsuitable for multiscale
 
     # Configure run
-    f = open(data_cfg)
+    f = open(data_cfg)   # 打开配置文件，获取跟路径和训练数据集的路径
     data_config = json.load(f)
     trainset_paths = data_config['train']
     dataset_root = data_config['root']
     f.close()
 
     transforms = T.Compose([T.ToTensor()])
-    # Get dataloader
+    # Get dataloader  # 加载训练集，调用datasets.py中的JointDataset函数
     dataset = JointDataset(dataset_root, trainset_paths, img_size, augment=True, transforms=transforms)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True,
                                              num_workers=8, pin_memory=True, drop_last=True, collate_fn=collate_fn)
     # Initialize model
+    # 加载模型
     model = Darknet(cfg, dataset.nID)
 
     cutoff = -1  # backbone reaches to cutoff layer
     start_epoch = 0
     if resume:
+
         checkpoint = torch.load(latest_resume, map_location='cpu')
 
         # Load weights to resume from
         model.load_state_dict(checkpoint['model'])
         model.cuda().train()
 
-        # Set optimizer
+        # Set optimizer 优化器选择
         optimizer = torch.optim.SGD(filter(lambda x: x.requires_grad, model.parameters()), lr=opt.lr, momentum=.9)
 
         start_epoch = checkpoint['epoch'] + 1
@@ -72,6 +74,9 @@ def train(
         del checkpoint  # current, saved
 
     else:
+        # 权重文件有两种—— “.pt” 和 “.weights"结尾的，以”.pt"结尾的文件需要用 torch.load()来读取，
+        # 以 ".weights"结尾的文件需要用 load_darknet_weights()来读取
+        # 从列表中将权重读出来，并用这些权重初始化网络参数
         # Initialize model with backbone (optional)
         if cfg.endswith('yolov3.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))
@@ -86,8 +91,10 @@ def train(
         optimizer = torch.optim.SGD(filter(lambda x: x.requires_grad, model.parameters()), lr=opt.lr, momentum=.9,
                                     weight_decay=1e-4)
 
-    model = torch.nn.DataParallel(model)
-    # Set scheduler
+    model = torch.nn.DataParallel(model)  # 多GPU并行
+    # Set scheduler  动态按照间隔调整学习率，默认学习率下降10倍（0.1）
+    # nilestones[]:列表，代表调整学习率的时机
+    # epoche为0.5*epochs的时候下降10倍，为0.75*epochs的时候再下降10倍
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
                                                      milestones=[int(0.5 * opt.epochs), int(0.75 * opt.epochs)],
                                                      gamma=0.1)
@@ -99,8 +106,8 @@ def train(
 
     # model_info(model)
     t0 = time.time()
-    for epoch in range(epochs):
-        epoch += start_epoch
+    for epoch in range(epochs):   # 开始训练
+        epoch += start_epoch   #
         logger.info(('%8s%12s' + '%10s' * 6) % (
             'Epoch', 'Batch', 'box', 'conf', 'id', 'total', 'nTargets', 'time'))
 
@@ -112,7 +119,7 @@ def train(
 
         ui = -1
         rloss = defaultdict(float)  # running loss
-        optimizer.zero_grad()
+        optimizer.zero_grad()   # 梯度下降
         for i, (imgs, targets, _, _, targets_len) in enumerate(dataloader):
             if sum([len(x) for x in targets]) < 1:  # if no targets continue
                 continue
@@ -125,6 +132,7 @@ def train(
                     g['lr'] = lr
 
             # Compute loss, compute gradient, update parameters
+            # 计算损失，和梯度，更新参数
             loss, components = model(imgs.cuda(), targets.cuda(), targets_len.cuda())
             components = torch.mean(components.view(-1, 5), dim=0)
             loss = torch.mean(loss)
@@ -169,12 +177,12 @@ def train(
             torch.save(checkpoint, osp.join(weights_to, "weights_epoch_" + str(epoch) + ".pt"))
 
         # Calculate mAP
-        if epoch % opt.test_interval == 0:
-            with torch.no_grad():
-                mAP, R, P = test.test(cfg, data_cfg, weights=latest, batch_size=batch_size, img_size=img_size,
-                                      print_interval=40, nID=dataset.nID)
-                test.test_emb(cfg, data_cfg, weights=latest, batch_size=batch_size, img_size=img_size,
-                              print_interval=40, nID=dataset.nID)
+        # if epoch % opt.test_interval == 0:
+        #     with torch.no_grad():
+        #         mAP, R, P = test.test(cfg, data_cfg, weights=latest, batch_size=batch_size, img_size=img_size,
+        #                               print_interval=40, nID=dataset.nID)
+        #         test.test_emb(cfg, data_cfg, weights=latest, batch_size=batch_size, img_size=img_size,
+        #                       print_interval=40, nID=dataset.nID)
 
         # Call scheduler.step() after opimizer.step() with pytorch > 1.1.0
         scheduler.step()
@@ -185,7 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs')
     parser.add_argument('--batch-size', type=int, default=2, help='size of each image batch')
     parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov3.cfg', help='cfg file path')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
     parser.add_argument('--weights-from', type=str, default='weights/',
                         help='Path for getting the trained model for resuming training (Should only be used with '
                              '--resume)')

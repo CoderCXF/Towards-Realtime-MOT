@@ -13,15 +13,17 @@ try:
     batch_norm=nn.BatchNorm2d  #SyncBN
 except ImportError:
     batch_norm=nn.BatchNorm2d
-
+# 该函数在Darknet读取YOLO网络之后被调用
+# 主要作用是根据由yolov3_1088...cfg返回的嵌套多个dict的列表创建网络结构
 def create_modules(module_defs):
     """
     Constructs module list of layer blocks from module configuration in module_defs
     """
-    hyperparams = module_defs.pop(0)
+    hyperparams = module_defs.pop(0)  # 超参是第一个元素width和height等等信息
     output_filters = [int(hyperparams['channels'])]
-    module_list = nn.ModuleList()
+    module_list = nn.ModuleList()   # pytorch的网络列表，自动注册
     yolo_layer_count = 0
+    # 遍历每一个网络块
     for i, module_def in enumerate(module_defs):
         modules = nn.Sequential()
 
@@ -30,6 +32,8 @@ def create_modules(module_defs):
             filters = int(module_def['filters'])
             kernel_size = int(module_def['size'])
             pad = (kernel_size - 1) // 2 if int(module_def['pad']) else 0
+            # 如果当前遍历到的块（moudle_def）是convolutional的话
+            # 就往moudles中添加一个卷积层nn.Conv2d
             modules.add_module('conv_%d' % i, nn.Conv2d(in_channels=output_filters[-1],
                                                         out_channels=filters,
                                                         kernel_size=kernel_size,
@@ -44,9 +48,11 @@ def create_modules(module_defs):
                 # but we find with the uniform initialization the model converges faster.
                 nn.init.uniform_(after_bn.weight) 
                 nn.init.zeros_(after_bn.bias)
+            # 如果定义了一个LR的话，就往moudles中添加一个leakyReLU层
             if module_def['activation'] == 'leaky':
                 modules.add_module('leaky_%d' % i, nn.LeakyReLU(0.1))
 
+        # 如果是maxpool层的话，就往moudles中添加一个maxpool
         elif module_def['type'] == 'maxpool':
             kernel_size = int(module_def['size'])
             stride = int(module_def['stride'])
@@ -55,28 +61,35 @@ def create_modules(module_defs):
             maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride, padding=int((kernel_size - 1) // 2))
             modules.add_module('maxpool_%d' % i, maxpool)
 
+        # 如果是upsample的话，就往moudles中添加一个upsample
         elif module_def['type'] == 'upsample':
             upsample = Upsample(scale_factor=int(module_def['stride']))
             modules.add_module('upsample_%d' % i, upsample)
 
+        # 如果是route的话，就往moudles中添加一个route
         elif module_def['type'] == 'route':
             layers = [int(x) for x in module_def['layers'].split(',')]
             filters = sum([output_filters[i + 1 if i > 0 else i] for i in layers])
             modules.add_module('route_%d' % i, EmptyLayer())
-
+        # 跨层连接
         elif module_def['type'] == 'shortcut':
             filters = output_filters[int(module_def['from'])]
             modules.add_module('shortcut_%d' % i, EmptyLayer())
 
+        # 如果是yolo的话
         elif module_def['type'] == 'yolo':
+            # anchor_idxs = [0, 1, 2, 3]
             anchor_idxs = [int(x) for x in module_def['mask'].split(',')]
             # Extract anchors
             anchors = [float(x) for x in module_def['anchors'].split(',')]
+            # anchors = [(8,24), (11,34), (16,48), (23,68),   (32,96), (45,135), (64,192), (90,271),   (128,384), (180,540), 256,640, 512,640]
             anchors = [(anchors[i], anchors[i + 1]) for i in range(0, len(anchors), 2)]
+            # anchors = [(8, 24), (11, 34), (16, 48), (23, 68)]
             anchors = [anchors[i] for i in anchor_idxs]
+            # nC = 1
             nC = int(module_def['classes'])  # number of classes
             img_size = (int(hyperparams['width']),int(hyperparams['height']))
-            # Define detection layer
+            # Define detection layer and add moudle to moudles
             yolo_layer = YOLOLayer(anchors, nC, int(hyperparams['nID']), 
                                    int(hyperparams['embedding_dim']), img_size, yolo_layer_count)
             modules.add_module('yolo_%d' % i, yolo_layer)
@@ -110,7 +123,7 @@ class Upsample(nn.Module):
     def forward(self, x):
         return F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
 
-
+# 核心代码
 class YOLOLayer(nn.Module):
     def __init__(self, anchors, nC, nID, nE, img_size, yolo_layer):
         super(YOLOLayer, self).__init__()
@@ -213,18 +226,20 @@ class YOLOLayer(nn.Module):
             return p.view(nB, -1, p.shape[-1])
 
 
+
 class Darknet(nn.Module):
     """YOLOv3 object detection model"""
 
     def __init__(self, cfg_dict, nID=0, test_emb=False):
         super(Darknet, self).__init__()
         if isinstance(cfg_dict, str):
-            cfg_dict = parse_model_cfg(cfg_dict)
-        self.module_defs = cfg_dict 
+            cfg_dict = parse_model_cfg(cfg_dict)  # parse_model_cfg函数在utils目录下，返回的是一个列表（保存整个YOLOv3的网络信息）
+        # moudle_defs保存整个网络的，列表中保存的是字典块（每一个卷积层是一块）
+        self.module_defs = cfg_dict
         self.module_defs[0]['nID'] = nID
         self.img_size = [int(self.module_defs[0]['width']), int(self.module_defs[0]['height'])]
         self.emb_dim = int(self.module_defs[0]['embedding_dim'])
-        self.hyperparams, self.module_list = create_modules(self.module_defs)
+        self.hyperparams, self.module_list = create_modules(self.module_defs)  # create_moudles函数在此文件上方，此时整个网络已经构架完成
         self.loss_names = ['loss', 'box', 'conf', 'id', 'nT']
         self.losses = OrderedDict()
         for ln in self.loss_names:
@@ -243,17 +258,22 @@ class Darknet(nn.Module):
         #img_size = x.shape[-1]
         layer_outputs = []
         output = []
+        '''
+        moudle_defs : 只是一个列表，保存的是yolov3_1088..cfg中每一个层
+        moudle_list : 已经创建好的网络模型
+        '''
 
         for i, (module_def, module) in enumerate(zip(self.module_defs, self.module_list)):
             mtype = module_def['type']
             if mtype in ['convolutional', 'upsample', 'maxpool']:
                 x = module(x)
-            elif mtype == 'route':
+            elif mtype == 'route':  # 维度做拼接
                 layer_i = [int(x) for x in module_def['layers'].split(',')]
                 if len(layer_i) == 1:
                     x = layer_outputs[layer_i[0]]
                 else:
                     x = torch.cat([layer_outputs[i] for i in layer_i], 1)
+            # 跨层连接
             elif mtype == 'shortcut':
                 layer_i = int(module_def['from'])
                 x = layer_outputs[-1] + layer_outputs[layer_i]
@@ -304,13 +324,15 @@ def create_grids(self, img_size, nGh, nGw):
     self.anchor_vec = self.anchors / self.stride
     self.anchor_wh = self.anchor_vec.view(1, self.nA, 1, 1, 2)
 
-
+# 权重文件有两种—— “.pt” 和 “.weights"结尾的，以”.pt"结尾的文件需要用 torch.load()来读取，
+# 以 ".weights"结尾的文件需要用 load_darknet_weights()来读取
 def load_darknet_weights(self, weights, cutoff=-1):
     # Parses and loads the weights stored in 'weights'
     # cutoff: save layers between 0 and cutoff (if cutoff = -1 all are saved)
     weights_file = weights.split(os.sep)[-1]
 
     # Try to download weights if not available locally
+    # 如果没有预训练模型的话，需要从网上下载
     if not os.path.isfile(weights):
         try:
             os.system('wget https://pjreddie.com/media/files/' + weights_file + ' -O ' + weights)
@@ -323,6 +345,7 @@ def load_darknet_weights(self, weights, cutoff=-1):
     elif weights_file == 'yolov3-tiny.conv.15':
         cutoff = 15
 
+    # 打开权重文件
     # Open the weights file
     fp = open(weights, 'rb')
     header = np.fromfile(fp, dtype=np.int32, count=5)  # First five are header values
@@ -335,6 +358,8 @@ def load_darknet_weights(self, weights, cutoff=-1):
     fp.close()
 
     ptr = 0
+    # 全卷积网络，只有卷积层和bn层有参数，由于bn层的参数是按照 bias, weight, running_mean, running_var的顺序写入列表的，
+    # 所以读取的时候也应该按照这个顺序，同时由于有bn层的时候卷积层没有偏置，所以不用读取卷积层的偏置
     for i, (module_def, module) in enumerate(zip(self.module_defs[:cutoff], self.module_list[:cutoff])):
         if module_def['type'] == 'convolutional':
             conv_layer = module[0]
