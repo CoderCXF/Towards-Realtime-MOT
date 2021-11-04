@@ -24,9 +24,7 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3134a045-30d6-4ea9-b5bf-a77ae095557c" name="Default Changelist" comment="modify">
-      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
-    </list>
+    <list default="true" id="3134a045-30d6-4ea9-b5bf-a77ae095557c" name="Default Changelist" comment="modify" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -165,7 +163,7 @@
       <workItem from="1635838339009" duration="71000" />
       <workItem from="1635838457986" duration="37000" />
       <workItem from="1635845425202" duration="202000" />
-      <workItem from="1635845744889" duration="35736000" />
+      <workItem from="1635845744889" duration="36075000" />
     </task>
     <task id="LOCAL-00001" summary="Test Pycharm Git">
       <created>1635755502897</created>
