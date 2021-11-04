@@ -99,6 +99,7 @@ def create_modules(module_defs):
         module_list.append(modules)
         output_filters.append(filters)
 
+    # 最后返回超参以及moudle_list这个网络列表
     return hyperparams, module_list
 
 
@@ -259,21 +260,20 @@ class Darknet(nn.Module):
         layer_outputs = []
         output = []
         '''
-        moudle_defs : 只是一个列表，保存的是yolov3_1088..cfg中每一个层
+        moudle_defs : 列表，保存的是yolov3_1088..cfg中每一个层
         moudle_list : 已经创建好的网络模型
         '''
-
         for i, (module_def, module) in enumerate(zip(self.module_defs, self.module_list)):
             mtype = module_def['type']
             if mtype in ['convolutional', 'upsample', 'maxpool']:
                 x = module(x)
-            elif mtype == 'route':  # 维度做拼接
+            elif mtype == 'route':  # 维度拼接
                 layer_i = [int(x) for x in module_def['layers'].split(',')]
                 if len(layer_i) == 1:
                     x = layer_outputs[layer_i[0]]
                 else:
-                    x = torch.cat([layer_outputs[i] for i in layer_i], 1)
-            # 跨层连接
+                    x = torch.cat([layer_outputs[i] for i in layer_i], 1)  #拼接
+            # 跨层连接(残差块)
             elif mtype == 'shortcut':
                 layer_i = int(module_def['from'])
                 x = layer_outputs[-1] + layer_outputs[layer_i]
