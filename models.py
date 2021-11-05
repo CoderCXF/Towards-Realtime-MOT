@@ -149,7 +149,7 @@ class YOLOLayer(nn.Module):
         
         self.emb_scale = math.sqrt(2) * math.log(self.nID-1) if self.nID>1 else 1
 
-        
+    # YOLOLayer 前向传播
 
     def forward(self, p_cat,  img_size, targets=None, classifier=None, test_emb=False):
         p, p_emb = p_cat[:, :24, ...], p_cat[:, 24:, ...]
@@ -168,7 +168,7 @@ class YOLOLayer(nn.Module):
         p_box = p[..., :4]
         p_conf = p[..., 4:6].permute(0, 4, 1, 2, 3)  # Conf
 
-        # Training
+        # Training and compute loss
         if targets is not None:
             if test_emb:
                 tconf, tbox, tids = build_targets_max(targets, self.anchor_vec.cuda(), self.nA, self.nC, nGh, nGw)
