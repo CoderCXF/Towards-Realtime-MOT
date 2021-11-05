@@ -102,7 +102,7 @@ def create_modules(module_defs):
     # 最后返回超参以及moudle_list这个网络列表
     return hyperparams, module_list
 
-
+# route and shorcut 层
 class EmptyLayer(nn.Module):
     """Placeholder for 'route' and 'shortcut' layers"""
 
@@ -112,7 +112,7 @@ class EmptyLayer(nn.Module):
     def forward(self, x):
         return x
 
-
+# 上采样层
 class Upsample(nn.Module):
     # Custom Upsample layer (nn.Upsample gives deprecated warning message)
 
@@ -124,7 +124,8 @@ class Upsample(nn.Module):
     def forward(self, x):
         return F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
 
-# 核心代码
+# 修改YOLOv3,核心代码，YOLO层
+# YOLOv3 = Darknet53 + YOLOLayer
 class YOLOLayer(nn.Module):
     def __init__(self, anchors, nC, nID, nE, img_size, yolo_layer):
         super(YOLOLayer, self).__init__()
@@ -288,6 +289,7 @@ class Darknet(nn.Module):
                         targets = [targets[i][:int(l)] for i,l in enumerate(targets_len)]
                     x = module[0](x, self.img_size, targets, self.classifier, self.test_emb)
                 else:  # get detections
+                    x = module[0](x, self.img_size)
                     x = module[0](x, self.img_size)
                 output.append(x)
             layer_outputs.append(x)

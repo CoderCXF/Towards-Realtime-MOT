@@ -56,7 +56,10 @@ def train(
 
     cutoff = -1  # backbone reaches to cutoff layer
     start_epoch = 0
+
+    # 如果是第二次训练的话，就用之前自己训练的模型
     if resume:
+
 
         checkpoint = torch.load(latest_resume, map_location='cpu')
 
@@ -73,16 +76,17 @@ def train(
 
         del checkpoint  # current, saved
 
+    # 如果是首次训练的话，就用draknet53.conv.74后者是yolov3-tiny.conv.15这两个权重文件
     else:
         # 权重文件有两种—— “.pt” 和 “.weights"结尾的，以”.pt"结尾的文件需要用 torch.load()来读取，
         # 以 ".weights"结尾的文件需要用 load_darknet_weights()来读取
         # 从列表中将权重读出来，并用这些权重初始化网络参数
         # Initialize model with backbone (optional)
         if cfg.endswith('yolov3.cfg'):
-            load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))
+            load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))    # weights/
             cutoff = 75
         elif cfg.endswith('yolov3-tiny.cfg'):
-            load_darknet_weights(model, osp.join(weights_from, 'yolov3-tiny.conv.15'))
+            load_darknet_weights(model, osp.join(weights_from, 'yolov3-tiny.conv.15'))  # weights/
             cutoff = 15
 
         model.cuda().train()
