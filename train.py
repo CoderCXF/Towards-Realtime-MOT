@@ -48,8 +48,10 @@ def train(
     transforms = T.Compose([T.ToTensor()])
     # Get dataloader  # 加载训练集，调用datasets.py中的JointDataset函数
     dataset = JointDataset(dataset_root, trainset_paths, img_size, augment=True, transforms=transforms)
+    # 随机读取小批量
+    # FIXME: num_workers = 5 ,0 is for train in LEGION(联想)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True,
-                                             num_workers=8, pin_memory=True, drop_last=True, collate_fn=collate_fn)
+                                             num_workers=0, pin_memory=True, drop_last=True, collate_fn=collate_fn)
     # Initialize model
     # 加载模型
     model = Darknet(cfg, dataset.nID)
@@ -195,7 +197,8 @@ def train(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs')
-    parser.add_argument('--batch-size', type=int, default=2, help='size of each image batch')
+    # FIXME: batch-size
+    parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
     parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
     parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
     parser.add_argument('--weights-from', type=str, default='weights/',
@@ -216,7 +219,9 @@ if __name__ == '__main__':
     opt = parser.parse_args()
 
     init_seeds()
-
+    if torch.cuda.is_available():
+        print("GPU is available")
+        print("当前GPU编号：", torch.cuda.current_device())
     train(
         opt.cfg,
         opt.data_cfg,

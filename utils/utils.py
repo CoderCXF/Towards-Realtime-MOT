@@ -314,15 +314,15 @@ def build_targets_max(target, anchor_wh, nA, nC, nGh, nGw):
 
 def build_targets_thres(target, anchor_wh, nA, nC, nGh, nGw):
     ID_THRESH = 0.5
-    FG_THRESH = 0.5
+    FG_THRESH = 0.5  # 前景和背景置信度
     BG_THRESH = 0.4
     nB = len(target)  # number of images in batch
     assert(len(anchor_wh)==nA)
 
-    tbox = torch.zeros(nB, nA, nGh, nGw, 4).cuda()  # batch size, anchors, grid size
+    tbox = torch.zeros(nB, nA, nGh, nGw, 4).cuda()  # nB = batch size, nA = anchors, (nGh, nGw) = (19,34) fetature map size
     tconf = torch.LongTensor(nB, nA, nGh, nGw).fill_(0).cuda()
     tid = torch.LongTensor(nB, nA, nGh, nGw, 1).fill_(-1).cuda() 
-    for b in range(nB):
+    for b in range(nB):   # 对于每一张图片
         t = target[b]
         t_id = t[:, 1].clone().long().cuda()
         t = t[:,[0,2,3,4,5]]
@@ -338,12 +338,14 @@ def build_targets_thres(target, anchor_wh, nA, nC, nGh, nGw):
         gxy[:, 0] = torch.clamp(gxy[:, 0], min=0, max=nGw -1)
         gxy[:, 1] = torch.clamp(gxy[:, 1], min=0, max=nGh -1)
 
+        # gt_boxes
         gt_boxes = torch.cat([gxy, gwh], dim=1)                                            # Shape Ngx4 (xc, yc, w, h)
         
         anchor_mesh = generate_anchor(nGh, nGw, anchor_wh)
         anchor_list = anchor_mesh.permute(0,2,3,1).contiguous().view(-1, 4)              # Shpae (nA x nGh x nGw) x 4
         #print(anchor_list.shape, gt_boxes.shape)
         iou_pdist = bbox_iou(anchor_list, gt_boxes)                                      # Shape (nA x nGh x nGw) x Ng
+        # iou_max 和 max_gt_index IOU值最大的列表
         iou_max, max_gt_index = torch.max(iou_pdist, dim=1)                              # Shape (nA x nGh x nGw), both
 
         iou_map = iou_max.view(nA, nGh, nGw)       

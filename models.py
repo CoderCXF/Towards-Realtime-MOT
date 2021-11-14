@@ -125,32 +125,38 @@ class Upsample(nn.Module):
         return F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
 
 # 修改YOLOv3,核心代码，YOLO层
-# YOLOv3 = Darknet53 + YOLOLayer
+# YOLOv3 = Darknet5390(主干特征提取网络) + YOLOLayer
 class YOLOLayer(nn.Module):
+    '''
+    anchors = [(8, 24), (11, 34), (16, 48), (23, 68)]
+    nC = 1,only person
+    nID =
+    nE = hyperparams['embedding_dim']
+    img_size = [1088, 608]
+    '''
     def __init__(self, anchors, nC, nID, nE, img_size, yolo_layer):
         super(YOLOLayer, self).__init__()
         self.layer = yolo_layer
         nA = len(anchors)
         self.anchors = torch.FloatTensor(anchors)
         self.nA = nA  # number of anchors (3)
-        self.nC = nC  # number of classes (80)
+        self.nC = nC  # number of classes (1)
         self.nID = nID # number of identities
         self.img_size = 0
         self.emb_dim = nE 
         self.shift = [1, 3, 5]
 
-        self.SmoothL1Loss  = nn.SmoothL1Loss()
-        self.SoftmaxLoss = nn.CrossEntropyLoss(ignore_index=-1)
+        self.SmoothL1Loss  = nn.SmoothL1Loss()  # L1损失：用于bbox回归
+        self.SoftmaxLoss = nn.CrossEntropyLoss(ignore_index=-1)  # 交叉熵损失:用于分类
         self.CrossEntropyLoss = nn.CrossEntropyLoss()
-        self.IDLoss = nn.CrossEntropyLoss(ignore_index=-1)
+        self.IDLoss = nn.CrossEntropyLoss(ignore_index=-1)  # embedding loss
         self.s_c = nn.Parameter(-4.15*torch.ones(1))  # -4.15
         self.s_r = nn.Parameter(-4.85*torch.ones(1))  # -4.85
         self.s_id = nn.Parameter(-2.3*torch.ones(1))  # -2.3
         
         self.emb_scale = math.sqrt(2) * math.log(self.nID-1) if self.nID>1 else 1
 
-    # YOLOLayer 前向传播
-
+    # YOLOLayer
     def forward(self, p_cat,  img_size, targets=None, classifier=None, test_emb=False):
         p, p_emb = p_cat[:, :24, ...], p_cat[:, 24:, ...]
         nB, nGh, nGw = p.shape[0], p.shape[-2], p.shape[-1]
@@ -163,12 +169,18 @@ class YOLOLayer(nn.Module):
                 self.anchor_wh = self.anchor_wh.cuda()
 
         p = p.view(nB, self.nA, self.nC + 5, nGh, nGw).permute(0, 1, 3, 4, 2).contiguous()  # prediction
-        
+
+        # permute
+        # 特征图划分为三部分 13x13x...
+        # 包含embedding信息的p_emb
         p_emb = p_emb.permute(0,2,3,1).contiguous()
+        # 包含检测框位置信息的p_box
         p_box = p[..., :4]
+        # 包含前景背景分类置信度的p_conf
         p_conf = p[..., 4:6].permute(0, 4, 1, 2, 3)  # Conf
 
         # Training and compute loss
+        # 抽取监督信息
         if targets is not None:
             if test_emb:
                 tconf, tbox, tids = build_targets_max(targets, self.anchor_vec.cuda(), self.nA, self.nC, nGh, nGw)
@@ -178,6 +190,9 @@ class YOLOLayer(nn.Module):
             mask = tconf > 0
 
             # Compute losses
+            # lbox:检测框回归损失
+            # lconf:前景背景分类损失
+            # lid:embedding损失
             nT = sum([len(x) for x in targets])  # number of targets
             nM = mask.sum().float()  # number of anchors (assigned to targets)
             nP = torch.ones_like(mask).sum().float()
@@ -186,6 +201,7 @@ class YOLOLayer(nn.Module):
             else:
                 FT = torch.cuda.FloatTensor if p_conf.is_cuda else torch.FloatTensor
                 lbox, lconf =  FT([0]), FT([0])
+
             lconf =  self.SoftmaxLoss(p_conf, tconf)
             lid = torch.Tensor(1).fill_(0).squeeze().cuda()
             emb_mask,_ = mask.max(1)
@@ -207,7 +223,7 @@ class YOLOLayer(nn.Module):
                 logits = classifier(embedding).contiguous()
                 lid =  self.IDLoss(logits, tids.squeeze())
 
-            # Sum loss components
+            # Sum loss components 总损失
             loss = torch.exp(-self.s_r)*lbox + torch.exp(-self.s_c)*lconf + torch.exp(-self.s_id)*lid + \
                    (self.s_r + self.s_c + self.s_id)
             loss *= 0.5
@@ -240,7 +256,7 @@ class Darknet(nn.Module):
         self.module_defs = cfg_dict
         self.module_defs[0]['nID'] = nID
         self.img_size = [int(self.module_defs[0]['width']), int(self.module_defs[0]['height'])]
-        self.emb_dim = int(self.module_defs[0]['embedding_dim'])
+        self.emb_dim = int(self.module_defs[0]['embedding_dim'])  # 512
         self.hyperparams, self.module_list = create_modules(self.module_defs)  # create_moudles函数在此文件上方，此时整个网络已经构架完成
         self.loss_names = ['loss', 'box', 'conf', 'id', 'nT']
         self.losses = OrderedDict()
@@ -312,7 +328,7 @@ def shift_tensor_vertically(t, delta):
     return res 
 
 def create_grids(self, img_size, nGh, nGw):
-    self.stride = img_size[0]/nGw
+    self.stride = img_size[0]/nGw   # 倍数
     assert self.stride == img_size[1] / nGh, \
             "{} v.s. {}/{}".format(self.stride, img_size[1], nGh)
 
