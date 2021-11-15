@@ -275,7 +275,7 @@ class JDETracker(object):
         '''
         更新所有的匹配的轨迹的状态，分为两种情况
         1. 轨迹状态是TrackState.Tracked，说明轨迹从当前帧没有断过，则把detection加入到track中，track加入至activeed_stracks
-        2. 轨迹之前跟丢了，但是在当前帧又匹配上了，所以把这个轨迹添加至refind_stracks
+        2. 轨迹之前跟丢了(是lost_stracks中的轨迹)，但是在当前帧又匹配上了，所以把这个轨迹添加至refind_stracks
         '''
         for itracked, idet in matches:
             # itracked is the id of the track and idet is the detection
@@ -298,8 +298,9 @@ class JDETracker(object):
         # detections is now a list of the unmatched detections
         r_tracked_stracks = [] # This is container for stracks which were tracked till the
         # previous frame but no detection was found for it in the current frame
-        # r_tracked_stracks ：保存的是在前面的视频帧中都没有跟丢，但是在当前帧没有找到对应检测的tracks
-
+        # r_tracked_stracks ：保存的是在前面的视频帧中都没有跟丢，但是在当前帧没有找到对应检测的tracks,即在上一步中没有关联上，但是在前面的帧中都已经关联上了,
+        # 此时 r_tracked_stracks中的所有的轨迹状态都是TrackState.Tracked
+        # 对这些r_tracked_stracks使用IOU再进行一次关联
         for i in u_track:
             if strack_pool[i].state == TrackState.Tracked:
                 r_tracked_stracks.append(strack_pool[i])
@@ -311,7 +312,8 @@ class JDETracker(object):
             det = detections[idet]
             if track.state == TrackState.Tracked:
                 track.update(det, self.frame_id)
-                activated_starcks.append(track)
+                activated_starcks.append(track)   # 如果前面帧都已经检测到的轨迹，但是在上一步中没有检测到的轨迹（轨迹状态仍然为Tracked）
+                                                  # 这个时候使用IOU又匹配到了，则将轨迹加入到activated_stracks中
             else:
                 track.re_activate(det, self.frame_id, new_id=False)
                 refind_stracks.append(track)
