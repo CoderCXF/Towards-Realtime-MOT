@@ -51,7 +51,7 @@ def train(
     # 随机读取小批量
     # FIXME: num_workers = 5 ,0 is for train in LEGION(联想)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True,
-                                             num_workers=0, pin_memory=True, drop_last=True, collate_fn=collate_fn)
+                                             num_workers=5, pin_memory=True, drop_last=True, collate_fn=collate_fn)
     # Initialize model
     # 加载模型
     model = Darknet(cfg, dataset.nID)
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs')
     # FIXME: batch-size
-    parser.add_argument('--batch-size', type=int, default=1, help='size of each image batch')
+    parser.add_argument('--batch-size', type=int, default=4, help='size of each image batch')
     parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
     parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
     parser.add_argument('--weights-from', type=str, default='weights/',
