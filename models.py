@@ -287,7 +287,7 @@ class Darknet(nn.Module):
             elif mtype == 'route':  # 维度拼接
                 layer_i = [int(x) for x in module_def['layers'].split(',')]
                 if len(layer_i) == 1:
-                    x = layer_outputs[layer_i[0]]
+                    x = layer_outputs[layer_i[0]]   # 如果是1个的话，直接输出（相当于直连）
                 else:
                     x = torch.cat([layer_outputs[i] for i in layer_i], 1)  #拼接
             # 跨层连接(残差块)

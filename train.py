@@ -139,6 +139,7 @@ def train(
 
             # Compute loss, compute gradient, update parameters
             # 计算损失，和梯度，更新参数
+            # 调用Darknet的forward函数
             loss, components = model(imgs.cuda(), targets.cuda(), targets_len.cuda())
             components = torch.mean(components.view(-1, 5), dim=0)
             loss = torch.mean(loss)
