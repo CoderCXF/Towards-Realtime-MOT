@@ -103,7 +103,7 @@ def create_modules(module_defs):
     return hyperparams, module_list
 
 # route and shorcut 层
-class EmptyLayer(nn.Module):
+class EmptyLayer(nn.Module):   # route层也可以看做的网络层，可以看做是线性输出的一层
     """Placeholder for 'route' and 'shortcut' layers"""
 
     def __init__(self):
