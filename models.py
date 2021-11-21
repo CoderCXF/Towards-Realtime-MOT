@@ -10,7 +10,7 @@ import math
 
 try:
     from utils.syncbn import SyncBN
-    batch_norm=SyncBN #nn.BatchNorm2d
+    batch_norm=nn.BatchNorm2d #SyncBN
 except ImportError:
     batch_norm=nn.BatchNorm2d
 
@@ -325,11 +325,11 @@ def load_darknet_weights(self, weights, cutoff=-1):
 
     # Open the weights file
     fp = open(weights, 'rb')
+    print(fp)
     header = np.fromfile(fp, dtype=np.int32, count=5)  # First five are header values
 
     # Needed to write header when saving weights
     self.header_info = header
-
     self.seen = header[3]  # number of images seen during training
     weights = np.fromfile(fp, dtype=np.float32)  # The rest are weights
     fp.close()
