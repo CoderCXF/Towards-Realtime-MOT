@@ -11,26 +11,36 @@ class TrackState(object):
 
 class BaseTrack(object):
     _count = 0
-
+    # 轨迹id
     track_id = 0
+    # 是否激活态
     is_activated = False
+    # 轨迹状态
     state = TrackState.New
 
     history = OrderedDict()
+    # 特征
     features = []
+    # 当前特征
     curr_feature = None
+    # 轨迹得分
     score = 0
+    # 起始帧
     start_frame = 0
+    # 帧id
     frame_id = 0
+    # 卡尔曼滤波更新轨迹的时间
     time_since_update = 0
 
-    # multi-camera
+    # multi-camera use
     location = (np.inf, np.inf)
 
+    # 轨迹结束帧
     @property
     def end_frame(self):
         return self.frame_id
 
+    # 下一帧号
     @staticmethod
     def next_id():
         BaseTrack._count += 1

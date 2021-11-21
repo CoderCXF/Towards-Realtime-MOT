@@ -340,7 +340,7 @@ def collate_fn(batch):
 
     return imgs, filled_labels, paths, sizes, labels_len.unsqueeze(1)
 
-
+# 在train.py中被调用
 class JointDataset(LoadImagesAndLabels):  # for training
     def __init__(self, root, paths, img_size=(1088,608), augment=False, transforms=None):
         
@@ -351,24 +351,28 @@ class JointDataset(LoadImagesAndLabels):  # for training
         self.tid_start_index = OrderedDict()
         for ds, path in paths.items():
             with open(path, 'r') as file:
-                self.img_files[ds] = file.readlines()
-                self.img_files[ds] = [osp.join(root, x.strip()) for x in self.img_files[ds]]
+                self.img_files[ds] = file.readlines()  # img_files[ds]就是mot17.train中的每一个训练图片
+                self.img_files[ds] = [osp.join(root, x.strip()) for x in self.img_files[ds]]  # img_files[ds]就是root路径
+                                                                                              # 再加上mot17.train中的路径，也就是找到了最后的训练图像
                 self.img_files[ds] = list(filter(lambda x: len(x) > 0, self.img_files[ds]))
 
+            # 找到label_files的路径
+            # 把img_files的路径替换即可
+            # images替换为labels_with_ids,png替换为txt,jpg替换为txt
             self.label_files[ds] = [x.replace('images', 'labels_with_ids').replace('.png', '.txt').replace('.jpg', '.txt')
                                 for x in self.img_files[ds]]
 
         for ds, label_paths in self.label_files.items():
             max_index = -1
             for lp in label_paths:
-                lb = np.loadtxt(lp)
-                if len(lb) < 1:
+                lb = np.loadtxt(lp)   # 读取每一个label_path（txt）文件
+                if len(lb) < 1:       # 如果只有一行数据的话，就不读
                     continue
-                if len(lb.shape) < 2:
+                if len(lb.shape) < 2:   # 二维的
                     img_max = lb[1]
                 else:
-                    img_max = np.max(lb[:,1])
-                if img_max >max_index:
+                    img_max = np.max(lb[:,1])  # 获取图片的最大个数
+                if img_max >max_index:         # 更新最大值
                     max_index = img_max 
             self.tid_num[ds] = max_index + 1
         

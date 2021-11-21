@@ -76,6 +76,8 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
 
     if save_dir:
         mkdir_if_missing(save_dir)
+
+    # 生成跟踪器
     tracker = JDETracker(opt, frame_rate=frame_rate)
     timer = Timer()
     results = []
@@ -87,10 +89,17 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
         # run tracking
         timer.tic()
         blob = torch.from_numpy(img).cuda().unsqueeze(0)
+
+        # online_targets就是JDETracker.update()方法的返回结果
+        # online_targets 是所有被跟踪到的目标（list[STrack]）
         online_targets = tracker.update(blob, img0)
         online_tlwhs = []
         online_ids = []
+        '''遍历所有的跟踪目标，进行画框显示，保存结果等处理'''
         for t in online_targets:
+            """ bounding box format `(top left x, top left y,
+                            width, height)`.
+            """
             tlwh = t.tlwh
             tid = t.track_id
             vertical = tlwh[2] / tlwh[3] > 1.6
@@ -120,7 +129,7 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
     mkdir_if_missing(result_root)
     data_type = 'mot'
 
-    # Read config
+    # Read config --> get img_size
     cfg_dict = parse_model_cfg(opt.cfg)
     opt.img_size = [int(cfg_dict[0]['width']), int(cfg_dict[0]['height'])]
 
@@ -132,9 +141,22 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
         output_dir = os.path.join(data_root, '..','outputs', exp_name, seq) if save_images or save_videos else None
 
         logger.info('start seq: {}'.format(seq))
+        # dataloader = /data/MOT16/train/seq/img
         dataloader = datasets.LoadImages(osp.join(data_root, seq, 'img1'), opt.img_size)
+        # result_filename = /data/MOT16/results/demo(exp_name)/seq.txt
         result_filename = os.path.join(result_root, '{}.txt'.format(seq))
-        meta_info = open(os.path.join(data_root, seq, 'seqinfo.ini')).read() 
+        # meta_info = /data/MOT16/train/seq/seqinfo.ini
+        # example:
+        # [Sequence]
+        # name=MOT17-02-DPM
+        # imDir=img1
+        # frameRate=30
+        # seqLength=600
+        # imWidth=1920
+        # imHeight=1080
+        # imExt=.jpg
+        meta_info = open(os.path.join(data_root, seq, 'seqinfo.ini')).read()
+        # frame_rate : 读取帧率大小
         frame_rate = int(meta_info[meta_info.find('frameRate')+10:meta_info.find('\nseqLength')])
         nf, ta, tc = eval_seq(opt, dataloader, data_type, result_filename,
                               save_dir=output_dir, show_image=show_image, frame_rate=frame_rate)
@@ -157,6 +179,7 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
     logger.info('Time elapsed: {:.2f} seconds, FPS: {:.2f}'.format(all_time, 1.0 / avg_time))
 
     # get summary
+    # 输出性能评价指标
     metrics = mm.metrics.motchallenge_metrics
     mh = mm.metrics.create()
     summary = Evaluator.get_summary(accs, seqs, metrics)
@@ -172,7 +195,7 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='track.py')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov3.cfg', help='cfg file path')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
     parser.add_argument('--weights', type=str, default='weights/latest.pt', help='path to weights file')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='iou threshold required to qualify as detected')
     parser.add_argument('--conf-thres', type=float, default=0.5, help='object confidence threshold')
