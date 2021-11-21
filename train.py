@@ -235,5 +235,5 @@ if __name__ == '__main__':
         epochs=opt.epochs,
         batch_size=opt.batch_size,
         accumulated_batches=opt.accumulated_batches,
-        opt=opt
+        opt=opt,
     )
