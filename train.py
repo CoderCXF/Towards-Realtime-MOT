@@ -74,7 +74,7 @@ def train(
 
     else:
         # Initialize model with backbone (optional)
-        if cfg.endswith('yolov3_1088x608.cfg'):
+        if cfg.endswith('yolov3.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))
             cutoff = 75
         elif cfg.endswith('yolov3-tiny.cfg'):
