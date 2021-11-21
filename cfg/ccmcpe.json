@@ -1,5 +1,5 @@
 {
-    "root":"/home/ubuntu/datasets/JDE/",
+    "root":"/root/datasets/",
     "train":
     {
         "mot17":"./data/mot17.train"
