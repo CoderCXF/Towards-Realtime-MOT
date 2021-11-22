@@ -10,7 +10,11 @@ import math
 
 try:
     from utils.syncbn import SyncBN
+<<<<<<< HEAD
     batch_norm=nn.BatchNorm2d  #SyncBN
+=======
+    batch_norm=nn.BatchNorm2d #SyncBN
+>>>>>>> fe779a15b595e5e4dae593fcedae78299e6e8bf0
 except ImportError:
     batch_norm=nn.BatchNorm2d
 # 该函数在Darknet读取YOLO网络之后被调用
@@ -366,11 +370,11 @@ def load_darknet_weights(self, weights, cutoff=-1):
     # 打开权重文件
     # Open the weights file
     fp = open(weights, 'rb')
+    print(fp)
     header = np.fromfile(fp, dtype=np.int32, count=5)  # First five are header values
 
     # Needed to write header when saving weights
     self.header_info = header
-
     self.seen = header[3]  # number of images seen during training
     weights = np.fromfile(fp, dtype=np.float32)  # The rest are weights
     fp.close()

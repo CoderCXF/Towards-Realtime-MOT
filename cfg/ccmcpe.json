@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
     "root":"/home/ubuntu/datasets/JDE/",
+=======
+    "root":"/root/datasets/",
+>>>>>>> fe779a15b595e5e4dae593fcedae78299e6e8bf0
     "train":
     {
         "mot17":"./data/mot17.train"

@@ -171,8 +171,15 @@ class STrack(BaseTrack):
 class JDETracker(object):
     def __init__(self, opt, frame_rate=30):
         self.opt = opt
+<<<<<<< HEAD
         # 加载模型
+=======
+<<<<<<< HEAD:tracker/multitracker.py
+        self.model = Darknet(opt.cfg, nID=548)  # 14455
+=======
+>>>>>>> fe779a15b595e5e4dae593fcedae78299e6e8bf0
         self.model = Darknet(opt.cfg, nID=14455)
+>>>>>>> b790c9c48bae773fbb23f40f7d311a396807fd1c:tracker/mot_tracker_kalman.py
         # load_darknet_weights(self.model, opt.weights)
         self.model.load_state_dict(torch.load(opt.weights, map_location='cpu')['model'], strict=False)
         self.model.cuda().eval()
