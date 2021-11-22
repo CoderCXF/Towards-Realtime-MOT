@@ -4,7 +4,8 @@ data/mot17
 data/mot19
 tmp/
 external/
-models/
+/models
+*.mp4
 =======
 # Byte-compiled / optimized / DLL files
 __pycache__/
