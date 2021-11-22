@@ -12,7 +12,7 @@ def parse_model_cfg(path):
             if module_defs[-1]['type'] == 'convolutional':
                 module_defs[-1]['batch_normalize'] = 0
         else:
-            key, value = line.split("=")
+            key,value = line.split("=")
             value = value.strip()
             if value[0] == '$':
                 value = module_defs[0].get(value.strip('$'), None)
