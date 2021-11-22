@@ -112,7 +112,10 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
     write_results(result_filename, results, data_type)
     return frame_id, timer.average_time, timer.calls
 
-
+'''
+    这个文件（该方法）的工作是对序列进行跟踪，输入的是一系列的图片（连续的帧），而不是一个视频，而demo.py输入的是一个视频
+    并且会有性能评估
+'''
 def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), exp_name='demo', 
          save_images=False, save_videos=False, show_image=True):
     logger.setLevel(logging.INFO)
@@ -128,14 +131,19 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
     accs = []
     n_frame = 0
     timer_avgs, timer_calls = [], []
+    '''遍历每一个序列文件，比如MOT17-02-SDP'''
     for seq in seqs:
+        '''output_dir = ....outputs/exp_name/seq(序列文件名)'''
         output_dir = os.path.join(data_root, '..','outputs', exp_name, seq) if save_images or save_videos else None
 
         logger.info('start seq: {}'.format(seq))
         dataloader = datasets.LoadImages(osp.join(data_root, seq, 'img1'), opt.img_size)
+        '''result_filename = ....results/exp_name/seq(序列文件名)'''
         result_filename = os.path.join(result_root, '{}.txt'.format(seq))
+        '''读取frame_rate'''
         meta_info = open(os.path.join(data_root, seq, 'seqinfo.ini')).read() 
         frame_rate = int(meta_info[meta_info.find('frameRate')+10:meta_info.find('\nseqLength')])
+        # eval_seq中进行跟踪
         nf, ta, tc = eval_seq(opt, dataloader, data_type, result_filename,
                               save_dir=output_dir, show_image=show_image, frame_rate=frame_rate)
         n_frame += nf
@@ -144,6 +152,7 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
 
         # eval
         logger.info('Evaluate seq: {}'.format(seq))
+        ''' 创建Evaluator对象，进行性能评价MOTA'''
         evaluator = Evaluator(data_root, seq, data_type)
         accs.append(evaluator.eval_file(result_filename))
         if save_videos:
@@ -172,8 +181,8 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='track.py')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov3.cfg', help='cfg file path')
-    parser.add_argument('--weights', type=str, default='weights/latest.pt', help='path to weights file')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
+    parser.add_argument('--weights', type=str, default='models/latest.pt', help='path to weights file')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='iou threshold required to qualify as detected')
     parser.add_argument('--conf-thres', type=float, default=0.5, help='object confidence threshold')
     parser.add_argument('--nms-thres', type=float, default=0.4, help='iou threshold for non-maximum suppression')
@@ -185,7 +194,7 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt, end='\n\n')
  
-    if not opt.test_mot16:
+    if not opt.test_mot16:        # test_mot = false
         seqs_str = '''MOT17-02-SDP
                       MOT17-04-SDP
                       MOT17-05-SDP
@@ -194,7 +203,7 @@ if __name__ == '__main__':
                       MOT17-11-SDP
                       MOT17-13-SDP
                     '''
-        data_root = '/home/wangzd/datasets/MOT/MOT17/images/train'
+        data_root = 'D:/datasets/MOT17/train'
     else:
         seqs_str = '''MOT16-01
                      MOT16-03
