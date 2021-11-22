@@ -49,9 +49,9 @@ def train(
     # Get dataloader  # 加载训练集，调用datasets.py中的JointDataset函数
     dataset = JointDataset(dataset_root, trainset_paths, img_size, augment=True, transforms=transforms)
     # 随机读取小批量
-    # FIXME: num_workers = 5 ,0 is for train in LEGION(联想)
+    # FIXME: num_workers = 8 ,0 is for train in LEGION(联想)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True,
-                                             num_workers=5, pin_memory=True, drop_last=True, collate_fn=collate_fn)
+                                             num_workers=8, pin_memory=True, drop_last=True, collate_fn=collate_fn)
     # Initialize model
     # i:
     # 加载模型
@@ -85,7 +85,7 @@ def train(
         # 以 ".weights"结尾的文件需要用 load_darknet_weights()来读取
         # 从列表中将权重读出来，并用这些权重初始化网络参数
         # Initialize model with backbone (optional)
-        if cfg.endswith('yolov3.cfg'):
+        if cfg.endswith('yolov3_1088x608.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))    # weights/
             cutoff = 75
         elif cfg.endswith('yolov3-tiny.cfg'):
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs')
     # FIXME: batch-size
     parser.add_argument('--batch-size', type=int, default=4, help='size of each image batch')
-    parser.add_argument('--accumulated-batches', type=int, default=4, help='number of batches before optimizer step')
+    parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
     parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
     parser.add_argument('--weights-from', type=str, default='weights/',
                         help='Path for getting the trained model for resuming training (Should only be used with '

@@ -10,7 +10,7 @@ import math
 
 try:
     from utils.syncbn import SyncBN
-    batch_norm=nn.BatchNorm2d  #SyncBN
+    batch_norm=nn.BatchNorm2d #SyncBN
 except ImportError:
     batch_norm=nn.BatchNorm2d
 # 该函数在Darknet读取YOLO网络之后被调用
@@ -305,7 +305,6 @@ class Darknet(nn.Module):
                         targets = [targets[i][:int(l)] for i,l in enumerate(targets_len)]
                     x = module[0](x, self.img_size, targets, self.classifier, self.test_emb)
                 else:  # get detections
-                    x = module[0](x, self.img_size)
                     x = module[0](x, self.img_size)
                 output.append(x)
             layer_outputs.append(x)
