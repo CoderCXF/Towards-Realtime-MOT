@@ -60,11 +60,8 @@ def train(
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True,
                                              num_workers=5, pin_memory=True, drop_last=True, collate_fn=collate_fn)
     # Initialize model
-<<<<<<< HEAD
     # 加载模型
-=======
     # i:
->>>>>>> fe779a15b595e5e4dae593fcedae78299e6e8bf0
     model = Darknet(cfg, dataset.nID)
 
     cutoff = -1  # backbone reaches to cutoff layer
@@ -72,8 +69,6 @@ def train(
 
     # 如果是第二次训练的话，就用之前自己训练的模型
     if resume:
-
-
         checkpoint = torch.load(latest_resume, map_location='cpu')
 
         # Load weights to resume from
@@ -95,13 +90,13 @@ def train(
         # 以 ".weights"结尾的文件需要用 load_darknet_weights()来读取
         # 从列表中将权重读出来，并用这些权重初始化网络参数
         # Initialize model with backbone (optional)
-<<<<<<< HEAD
+
         if cfg.endswith('yolov3.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))    # weights/
-=======
+
         if cfg.endswith('yolov3_1088x608.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))
->>>>>>> fe779a15b595e5e4dae593fcedae78299e6e8bf0
+
             cutoff = 75
         elif cfg.endswith('yolov3-tiny.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'yolov3-tiny.conv.15'))  # weights/
@@ -214,10 +209,7 @@ def train(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs')
-<<<<<<< HEAD
     # FIXME: batch-size
-=======
->>>>>>> fe779a15b595e5e4dae593fcedae78299e6e8bf0
     parser.add_argument('--batch-size', type=int, default=4, help='size of each image batch')
     parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
     parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
