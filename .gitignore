@@ -4,6 +4,7 @@ data/mot17
 data/mot19
 tmp/
 external/
+models/
 =======
 # Byte-compiled / optimized / DLL files
 __pycache__/
