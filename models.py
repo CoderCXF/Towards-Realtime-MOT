@@ -252,7 +252,7 @@ class Darknet(nn.Module):
         super(Darknet, self).__init__()
         if isinstance(cfg_dict, str):
             cfg_dict = parse_model_cfg(cfg_dict)  # parse_model_cfg函数在utils目录下，返回的是一个列表（保存整个YOLOv3的网络信息）
-        # moudle_defs保存整个网络的，列表中保存的是字典块（每一个卷积层是一块）
+                                                    # moudle_defs保存整个网络的，列表中保存的是字典块（每一个卷积层是一块）
         self.module_defs = cfg_dict
         self.module_defs[0]['nID'] = nID
         self.img_size = [int(self.module_defs[0]['width']), int(self.module_defs[0]['height'])]
