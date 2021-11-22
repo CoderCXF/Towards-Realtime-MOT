@@ -10,11 +10,8 @@ import math
 
 try:
     from utils.syncbn import SyncBN
-<<<<<<< HEAD
     batch_norm=nn.BatchNorm2d  #SyncBN
-=======
     batch_norm=nn.BatchNorm2d #SyncBN
->>>>>>> fe779a15b595e5e4dae593fcedae78299e6e8bf0
 except ImportError:
     batch_norm=nn.BatchNorm2d
 # 该函数在Darknet读取YOLO网络之后被调用
