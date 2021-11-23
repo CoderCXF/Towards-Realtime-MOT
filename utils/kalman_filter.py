@@ -266,6 +266,7 @@ class KalmanFilter(object):
         if metric == 'gaussian':
             return np.sum(d * d, axis=1)
         elif metric == 'maha':
+            # 判断是不是正定矩阵
             cholesky_factor = np.linalg.cholesky(covariance)
             z = scipy.linalg.solve_triangular(
                 cholesky_factor, d.T, lower=True, check_finite=False,

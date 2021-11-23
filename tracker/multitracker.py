@@ -1,3 +1,5 @@
+import sys
+
 from numba import jit
 from collections import deque
 import torch
@@ -113,6 +115,7 @@ class STrack(BaseTrack):
         ret = self.mean[:4].copy()
         ret[2] *= ret[3]
         ret[:2] -= ret[2:] / 2
+        # print(sys._getframe().f_lineno, ret)
         return ret
 
     @property
@@ -134,6 +137,7 @@ class STrack(BaseTrack):
         ret = np.asarray(tlwh).copy()
         ret[:2] += ret[2:] / 2
         ret[2] /= ret[3]
+        # print(sys._getframe().f_lineno, ret)
         return ret
 
     def to_xyah(self):
