@@ -8,6 +8,7 @@ external/
 *.mp4
 /.idea
 .idea/
+tools/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
