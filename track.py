@@ -114,7 +114,7 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
 
 '''
     这个文件（该方法）的工作是对序列进行跟踪，输入的是一系列的图片（连续的帧），而不是一个视频，而demo.py输入的是一个视频
-    并且会有性能评估
+    并且还会调用evaluation.py进行指标评价
 '''
 def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), exp_name='demo', 
          save_images=False, save_videos=False, show_image=True):
@@ -135,8 +135,9 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
     for seq in seqs:
         '''output_dir = ....outputs/exp_name/seq(序列文件名)'''
         output_dir = os.path.join(data_root, '..','outputs', exp_name, seq) if save_images or save_videos else None
-
+        print('#####################################################')
         logger.info('start seq: {}'.format(seq))
+        print('#####################################################')
         dataloader = datasets.LoadImages(osp.join(data_root, seq, 'img1'), opt.img_size)
         '''result_filename = ....results/exp_name/seq(序列文件名)'''
         result_filename = os.path.join(result_root, '{}.txt'.format(seq))
@@ -168,12 +169,17 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
     # get summary
     metrics = mm.metrics.motchallenge_metrics
     mh = mm.metrics.create()
+    '''获取总的评价'''
     summary = Evaluator.get_summary(accs, seqs, metrics)
     strsummary = mm.io.render_summary(
         summary,
         formatters=mh.formatters,
         namemap=mm.io.motchallenge_metric_names
     )
+    '''打印总的评价指标并且保存成excel中
+        保存路径为result下面的summary_{}.xlsx文件
+    '''
+
     print(strsummary)
     Evaluator.save_summary(summary, os.path.join(result_root, 'summary_{}.xlsx'.format(exp_name)))
 
@@ -188,6 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('--nms-thres', type=float, default=0.4, help='iou threshold for non-maximum suppression')
     parser.add_argument('--min-box-area', type=float, default=200, help='filter out tiny boxes')
     parser.add_argument('--track-buffer', type=int, default=30, help='tracking buffer')
+    # 下面3个 'store_true', 如果不加的话，默认是false
     parser.add_argument('--test-mot16', action='store_true', help='tracking buffer')
     parser.add_argument('--save-images', action='store_true', help='save tracking results (image)')
     parser.add_argument('--save-videos', action='store_true', help='save tracking results (video)')
@@ -197,7 +204,6 @@ if __name__ == '__main__':
     if not opt.test_mot16:        # test_mot = false
         seqs_str = '''MOT17-02-SDP
                       MOT17-04-SDP
-                      MOT17-05-SDP
                       MOT17-09-SDP
                       MOT17-10-SDP
                       MOT17-11-SDP
