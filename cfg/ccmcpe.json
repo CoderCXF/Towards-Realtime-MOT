@@ -2,7 +2,11 @@
     "root":"/root/datasets/",
     "train":
     {
-        "mot17":"./data/mot17.train"
+        "mot17":"./data/mot17.train",
+        "caltech":"./data/caltech.train",
+        "cuhksysu":"./data/cuhksysu.train",
+        "prw":"./data/prw.train",
+        "eth":"./data/eth.train"
     },
     "test_emb":
     {
