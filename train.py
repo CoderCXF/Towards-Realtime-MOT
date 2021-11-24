@@ -208,7 +208,7 @@ if __name__ == '__main__':
     # FIXME: batch-size
     parser.add_argument('--batch-size', type=int, default=4, help='size of each image batch')
     parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov3_1088x608.cfg', help='cfg file path')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov4.cfg', help='cfg file path')
     parser.add_argument('--weights-from', type=str, default='weights/',
                         help='Path for getting the trained model for resuming training (Should only be used with '
                              '--resume)')
