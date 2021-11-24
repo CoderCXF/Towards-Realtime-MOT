@@ -91,12 +91,8 @@ def train(
         # 从列表中将权重读出来，并用这些权重初始化网络参数
         # Initialize model with backbone (optional)
 
-        if cfg.endswith('yolov3.cfg'):
-            load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))    # weights/
-
         if cfg.endswith('yolov3_1088x608.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))
-
             cutoff = 75
         elif cfg.endswith('yolov3-tiny.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'yolov3-tiny.conv.15'))  # weights/
