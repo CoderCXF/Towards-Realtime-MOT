@@ -175,7 +175,7 @@ class JDETracker(object):
         # 加载模型
 
         self.model = Darknet(opt.cfg, nID=548)  # 14455
-        # self.model = Darknet(opt.cfg, nID=14455)
+
         # load_darknet_weights(self.model, opt.weights)
         self.model.load_state_dict(torch.load(opt.weights, map_location='cpu')['model'], strict=False)
         self.model.cuda().eval()
@@ -236,6 +236,8 @@ class JDETracker(object):
             scale_coords(self.opt.img_size, dets[:, :4], img0.shape).round()
             '''Detections is list of (x1, y1, x2, y2, object_conf, class_score, class_pred)'''
             # class_pred is the embeddings.
+            # def __init__(self, tlwh, score, temp_feat, buffer_size=30):
+            #             ( ,    bbox的tlwh,  bbox分类得分， 当前特征)
             detections = [STrack(STrack.tlbr_to_tlwh(tlbrs[:4]), tlbrs[4], f.numpy(), 30) for
                           (tlbrs, f) in zip(dets[:, :5], dets[:, 6:])]
         else:
