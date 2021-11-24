@@ -109,7 +109,7 @@ def train(
                                     weight_decay=1e-4)
 
     model = torch.nn.DataParallel(model)  # 多GPU并行
-    # Set scheduler  动态按照间隔调整学习率，默认学习率下降10倍（0.1）
+    # Set scheduler  动态按照间隔调整学习率，默认学习率下降10倍（为原来的0.1），目的是为了可以收敛，具体的可以看学习率的作用
     # nilestones[]:列表，代表调整学习率的时机
     # epoche为0.5*epochs的时候下降10倍，为0.75*epochs的时候再下降10倍
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
