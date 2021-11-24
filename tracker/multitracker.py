@@ -175,7 +175,7 @@ class JDETracker(object):
         # 加载模型
 
         self.model = Darknet(opt.cfg, nID=548)  # 14455
-        self.model = Darknet(opt.cfg, nID=14455)
+        # self.model = Darknet(opt.cfg, nID=14455)
         # load_darknet_weights(self.model, opt.weights)
         self.model.load_state_dict(torch.load(opt.weights, map_location='cpu')['model'], strict=False)
         self.model.cuda().eval()
