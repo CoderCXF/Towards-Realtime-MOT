@@ -35,10 +35,6 @@ def train(
     # print(timme)
     weights_to = osp.join(weights_to, 'run' + timme)
     mkdir_if_missing(weights_to)
-    print(123)
-
-    weights_to = osp.join(weights_to, 'run' + timme)
-    mkdir_if_missing(weights_to)
 
     if resume:
         latest_resume = osp.join(weights_from, 'latest.pt')
@@ -226,3 +222,8 @@ if __name__ == '__main__':
         accumulated_batches=opt.accumulated_batches,
         opt=opt,
     )
+'''
+    如果训练中断，要在已经训练的模型上继续训练的话，需要加上两个额外参数：
+    --weights-from : 指明模型哪一个
+    --resume       : 确认是重新训练
+'''

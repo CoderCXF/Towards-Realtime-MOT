@@ -206,6 +206,7 @@ if __name__ == '__main__':
     parser.add_argument('--min-box-area', type=float, default=200, help='filter out tiny boxes')
     parser.add_argument('--track-buffer', type=int, default=30, help='tracking buffer')
     # 下面3个 'store_true', 如果不加的话，默认是false
+    # 不触发的时候就是false，触发的时候是true
     parser.add_argument('--test-mot16', action='store_true', help='tracking buffer')
     parser.add_argument('--save-images', action='store_true', help='save tracking results (image)')
     parser.add_argument('--save-videos', action='store_true', help='save tracking results (video)')
