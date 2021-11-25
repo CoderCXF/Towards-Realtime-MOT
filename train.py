@@ -33,11 +33,7 @@ def train(
     timme = timme.replace(':', '_')
 
     # print(timme)
-    weights_to = osp.join(weights_to, 'run' + timme)
-    mkdir_if_missing(weights_to)
-    print(123)
-
-    weights_to = osp.join(weights_to, 'run' + timme)
+    weights_to = osp.join(weights_to, 'run_yolov4_' + timme)
     mkdir_if_missing(weights_to)
 
     if resume:
@@ -91,7 +87,7 @@ def train(
         # 从列表中将权重读出来，并用这些权重初始化网络参数
         # Initialize model with backbone (optional)
 
-        if cfg.endswith('yolov3_1088x608.cfg'):
+        if cfg.endswith('yolov4.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))
             cutoff = 75
         elif cfg.endswith('yolov3-tiny.cfg'):
