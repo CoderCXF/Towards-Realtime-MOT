@@ -217,7 +217,7 @@ if __name__ == '__main__':
                       MOT17-11-SDP
                       MOT17-13-SDP
                     '''
-        data_root = '/home/wangzd/datasets/MOT/MOT17/images/train'
+        data_root = '/home/wangzd/datasets/MOT/MOT17/images/test'
     else:
         seqs_str = '''MOT16-01
                      MOT16-03
