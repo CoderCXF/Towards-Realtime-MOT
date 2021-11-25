@@ -351,15 +351,17 @@ def load_darknet_weights(self, weights, cutoff=-1):
     weights_file = weights.split(os.sep)[-1]
 
     # Try to download weights if not available locally
-    # 如果没有预训练模型的话，需要从网上下载
+    ''' 如果没有预训练模型的话，需要从网上下载'''
+    '''yolov4跳过'''
+
     if not os.path.isfile(weights):
         try:
             os.system('wget https://pjreddie.com/media/files/' + weights_file + ' -O ' + weights)
         except IOError:
             print(weights + ' not found')
-
+    print("pre-train model has exists and load success!")
     # Establish cutoffs
-    if weights_file == 'darknet53.conv.74':
+    if weights_file == 'yolov4.conv.137':
         cutoff = 75
     elif weights_file == 'yolov3-tiny.conv.15':
         cutoff = 15

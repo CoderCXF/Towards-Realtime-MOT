@@ -88,7 +88,8 @@ def train(
         # Initialize model with backbone (optional)
 
         if cfg.endswith('yolov4.cfg'):
-            load_darknet_weights(model, osp.join(weights_from, 'darknet53.conv.74'))
+            # FIXME： 修改了默认的初始训练文件
+            load_darknet_weights(model, osp.join(weights_from, 'yolov4.conv.137'))
             cutoff = 75
         elif cfg.endswith('yolov3-tiny.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'yolov3-tiny.conv.15'))  # weights/
