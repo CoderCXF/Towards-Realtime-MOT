@@ -90,7 +90,7 @@ def train(
         if cfg.endswith('yolov4.cfg'):
             # FIXME： 修改了默认的初始训练文件
             load_darknet_weights(model, osp.join(weights_from, 'yolov4.conv.137'))
-            cutoff = 75
+            cutoff = 106
         elif cfg.endswith('yolov3-tiny.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'yolov3-tiny.conv.15'))  # weights/
             cutoff = 15
@@ -124,7 +124,7 @@ def train(
         # Freeze darknet53.conv.74 for first epoch
         if freeze_backbone and (epoch < 2):
             for i, (name, p) in enumerate(model.named_parameters()):
-                if int(name.split('.')[2]) < cutoff:  # if layer < 75
+                if int(name.split('.')[2]) < cutoff:  # if layer < 75,for yolov4, is 106
                     p.requires_grad = False if (epoch == 0) else True
 
         ui = -1
