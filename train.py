@@ -177,7 +177,7 @@ def train(
                       'optimizer': optimizer.state_dict()}
         if not os.path.exists(weights_to + '/cfg'):
             os.mkdir(weights_to + '/cfg')
-        copyfile(cfg, weights_to + '/cfg/yolo3.cfg')
+        copyfile(cfg, weights_to + '/cfg/yolov4.cfg')
         copyfile(data_cfg, weights_to + '/cfg/ccmcpe.json')
 
         latest = osp.join(weights_to, 'latest.pt')
