@@ -214,24 +214,23 @@ if __name__ == '__main__':
     print(opt, end='\n\n')
  
     if not opt.test_mot16:        # test_mot = false
-        # seqs_str = '''MOT17-02-SDP
-        #               MOT17-04-SDP
-        #               MOT17-05-SDP
-        #               MOT17-09-SDP
-        #               MOT17-10-SDP
-        #               MOT17-11-SDP
-        #               MOT17-13-SDP
-        #             '''
-        # data_root = '/home/kb249/cxf/JDE/testDatasets/MOT17/train'
-        seqs_str = '''MOT17-01-SDP
-                      MOT17-03-SDP
-                      MOT17-06-SDP
-                      MOT17-07-SDP 
-                      MOT17-08-SDP
-                      MOT17-12-SDP
-                      MOT17-14-SDP
+        seqs_str = '''MOT17-02-SDP
+                      MOT17-04-SDP
+                      MOT17-05-SDP
+                      MOT17-09-SDP
+                      MOT17-10-SDP
+                      MOT17-11-SDP
+                      MOT17-13-SDP
                     '''
-        data_root = '/home/kb249/cxf/JDE/testDatasets/MOT17/test'
+        data_root = '/home/kb249/cxf/JDE/testDatasets/MOT17/images/train'
+        # seqs_str = '''MOT17-01-SDP
+        #               MOT17-03-SDP
+        #               MOT17-06-SDP
+        #               MOT17-08-SDP
+        #               MOT17-12-SDP
+        #               MOT17-14-SDP
+        #             '''
+        # data_root = '/home/kb249/cxf/JDE/testDatasets/MOT17/test'
     else:
         seqs_str = '''MOT16-01
                      MOT16-03
