@@ -208,8 +208,8 @@ if __name__ == '__main__':
     # 下面3个 'store_true', 如果不加的话，默认是false
     # 不触发的时候就是false，触发的时候是true
     parser.add_argument('--test-mot16', action='store_true', help='tracking buffer')
-    parser.add_argument('--save-images', action='store_true', help='save tracking results (image)')
-    parser.add_argument('--save-videos', action='store_true', help='save tracking results (video)')
+    parser.add_argument('--save-images', action='store_false', help='save tracking results (image)')
+    parser.add_argument('--save-videos', action='store_false', help='save tracking results (video)')
     opt = parser.parse_args()
     print(opt, end='\n\n')
  
@@ -219,7 +219,7 @@ if __name__ == '__main__':
                       MOT17-09-SDP
                       MOT17-02-SDP 
                     '''
-        data_root = 'D:/datasets/MOT17/train'
+        data_root = '/home/kb249/cxf/JDE/testDatasets/MOT17/test'
     else:
         seqs_str = '''MOT16-01
                      MOT16-03
@@ -228,7 +228,7 @@ if __name__ == '__main__':
                      MOT16-08
                      MOT16-12
                      MOT16-14'''
-        data_root = 'D:/datasets/MOT16/test'
+        data_root = '/home/kb249/cxf/JDE/testDatasets/MOT16/test'
     seqs = [seq.strip() for seq in seqs_str.split()]
 
     main(opt,

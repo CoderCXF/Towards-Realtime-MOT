@@ -16,7 +16,7 @@ from utils.utils import xyxy2xywh
 class LoadImages:  # for inference
     def __init__(self, path, img_size=(1088, 608)):
         print(path)
-        print(os.path.isdir("D:/datasets/MOT17/images/train/MOT17-02-SDP"))
+        print(os.path.isdir(path))
         print(os.path.isfile(path))
         if os.path.isdir(path):
             image_format = ['.jpg', '.jpeg', '.png', '.tif']
