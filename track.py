@@ -209,6 +209,15 @@ if __name__ == '__main__':
     print(opt, end='\n\n')
  
     if not opt.test_mot16:
+        # seqs_str = '''MOT17-02-SDP
+        #               MOT17-04-SDP
+        #               MOT17-05-SDP
+        #               MOT17-09-SDP
+        #               MOT17-10-SDP
+        #               MOT17-11-SDP
+        #               MOT17-13-SDP
+        #             '''
+        # data_root = '/home/kb249/cxf/JDE/testDatasets/MOT17/train'
         seqs_str = '''MOT17-02-SDP
                       MOT17-04-SDP
                       MOT17-05-SDP
