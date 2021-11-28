@@ -196,15 +196,15 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='track.py')
     parser.add_argument('--cfg', type=str, default='cfg/yolov4.cfg', help='cfg file path')
-    parser.add_argument('--weights', type=str, default='weights/latest.pt', help='path to weights file')
+    parser.add_argument('--weights', type=str, default='models/latest.pt', help='path to weights file')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='iou threshold required to qualify as detected')
     parser.add_argument('--conf-thres', type=float, default=0.5, help='object confidence threshold')
     parser.add_argument('--nms-thres', type=float, default=0.4, help='iou threshold for non-maximum suppression')
     parser.add_argument('--min-box-area', type=float, default=200, help='filter out tiny boxes')
     parser.add_argument('--track-buffer', type=int, default=30, help='tracking buffer')
-    parser.add_argument('--test-mot16', action='store_true', help='tracking buffer')
-    parser.add_argument('--save-images', action='store_true', help='save tracking results (image)')
-    parser.add_argument('--save-videos', action='store_true', help='save tracking results (video)')
+    parser.add_argument('--test-mot16', action='store_false', help='tracking buffer')  # 默认使用mot16测试，不用加参数
+    parser.add_argument('--save-images', action='store_false', help='save tracking results (image)') # 默认保存跟踪好的图像
+    parser.add_argument('--save-videos', action='store_false', help='save tracking results (video)') # 默认保存跟踪视频
     opt = parser.parse_args()
     print(opt, end='\n\n')
  
@@ -217,7 +217,7 @@ if __name__ == '__main__':
                       MOT17-11-SDP
                       MOT17-13-SDP
                     '''
-        data_root = '/home/wangzd/datasets/MOT/MOT17/images/test'
+        data_root = '/home/kb249/cxf/JDE/testDatasets/MOT17/test'
     else:
         seqs_str = '''MOT16-01
                      MOT16-03
@@ -226,7 +226,7 @@ if __name__ == '__main__':
                      MOT16-08
                      MOT16-12
                      MOT16-14'''
-        data_root = '/home/wangzd/datasets/MOT/MOT16/images/test'
+        data_root = '/home/kb249/cxf/JDE/testDatasets/MOT16/test/'
     seqs = [seq.strip() for seq in seqs_str.split()]
 
     main(opt,

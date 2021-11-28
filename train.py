@@ -16,7 +16,7 @@ def train(
         data_cfg,
         weights_from="",
         weights_to="",
-        save_every=10,
+        save_every=5,
         img_size=(1088, 608),
         resume=False,
         epochs=100,
