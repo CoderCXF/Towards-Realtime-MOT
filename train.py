@@ -7,9 +7,10 @@ from models import *
 from shutil import copyfile
 from utils.datasets import JointDataset, collate_fn
 from utils.utils import *
-from utils.log import logger
+# from utils.log import logger
 from torchvision.transforms import transforms as T
-
+import logging
+from logging import Logger, handlers
 
 def train(
         cfg,
@@ -90,7 +91,7 @@ def train(
         if cfg.endswith('yolov4.cfg'):
             # FIXME： 修改了默认的初始训练文件
             load_darknet_weights(model, osp.join(weights_from, 'yolov4.conv.137'))
-            cutoff = 106
+            cutoff = 106 # TODO: should be 107???
         elif cfg.endswith('yolov3-tiny.cfg'):
             load_darknet_weights(model, osp.join(weights_from, 'yolov3-tiny.conv.15'))  # weights/
             cutoff = 15
@@ -116,6 +117,19 @@ def train(
 
     # model_info(model)
     t0 = time.time()
+
+    '''update logging module to print in terminal and write to log.txt'''
+    logger = logging.getLogger(opt.log)
+    format_str = logging.Formatter('%(asctime)s:    %(message)s')
+    logger.setLevel(logging.INFO)  # 设置日志级别
+    sh = logging.StreamHandler()  # 往屏幕上输出
+    sh.setFormatter(format_str)   # 设置屏幕上显示的格式
+
+    th = handlers.RotatingFileHandler(filename=opt.log, maxBytes=1*1024*1024, backupCount=5)  # 文件输出
+    th.setFormatter(format_str)
+    logger.addHandler(sh)
+    logger.addHandler(th)
+    ''''''
     for epoch in range(epochs):   # 开始训练
         epoch += start_epoch   #
         logger.info(('%8s%12s' + '%10s' * 6) % (
@@ -203,7 +217,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs')
     # FIXME: batch-size
-    parser.add_argument('--batch-size', type=int, default=8, help='size of each image batch')
+    parser.add_argument('--batch-size', type=int, default=4, help='size of each image batch')
     parser.add_argument('--accumulated-batches', type=int, default=1, help='number of batches before optimizer step')
     parser.add_argument('--cfg', type=str, default='cfg/yolov4.cfg', help='cfg file path')
     parser.add_argument('--weights-from', type=str, default='weights/',
@@ -221,6 +235,7 @@ if __name__ == '__main__':
     parser.add_argument('--test-interval', type=int, default=9, help='test interval')
     parser.add_argument('--lr', type=float, default=1e-2, help='init lr')
     parser.add_argument('--unfreeze-bn', action='store_true', help='unfreeze bn')
+    parser.add_argument('--log', type=str, default='./log.txt', help='log text')
     opt = parser.parse_args()
 
     init_seeds()
