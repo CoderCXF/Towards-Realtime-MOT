@@ -9,6 +9,8 @@ from utils.datasets import JointDataset, collate_fn
 from utils.utils import *
 from utils.log import logger
 from torchvision.transforms import transforms as T
+import logging
+from logging import Logger, handlers
 
 
 def train(
@@ -103,6 +105,18 @@ def train(
 
     # model_info(model)
     t0 = time.time()
+    '''update logging module to print in terminal and write to log.txt'''
+    logger = logging.getLogger(opt.log)
+    format_str = logging.Formatter('%(asctime)s:    %(message)s')
+    logger.setLevel(logging.INFO)  # 设置日志级别
+    sh = logging.StreamHandler()  # 往屏幕上输出
+    sh.setFormatter(format_str)   # 设置屏幕上显示的格式
+
+    th = handlers.RotatingFileHandler(filename=opt.log, maxBytes=1*1024*1024, backupCount=5)  # 文件输出
+    th.setFormatter(format_str)
+    logger.addHandler(sh)
+    logger.addHandler(th)
+    ''''''
     for epoch in range(epochs):
         epoch += start_epoch
         logger.info(('%8s%12s' + '%10s' * 6) % (
